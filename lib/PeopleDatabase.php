@@ -29,10 +29,6 @@ class PeopleDatabase
    */
   public function __construct(array $data = [])
   {
-    echo '<pre>';
-    print_r($data);
-    echo '</pre>';
-
     if (empty($this->id = $data['id'])) {
       $this->firstName = $data['firstName'];
       $this->lastName = $data['lastName'];
