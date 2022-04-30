@@ -5,6 +5,9 @@ namespace Lib;
 use PDO;
 use PDOException;
 
+/**
+ * This class create database and table if db not found
+ */
 class Database
 {
 

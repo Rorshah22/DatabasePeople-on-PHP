@@ -3,9 +3,10 @@
 namespace Lib;
 
 use PDO;
-use PDOException;
 use stdClass;
+use Exception;
 use Lib\Database;
+use PDOException;
 
 
 /**
@@ -28,11 +29,15 @@ class PeopleDatabase
    */
   public function __construct(array $data = [])
   {
+    echo '<pre>';
+    print_r($data);
+    echo '</pre>';
+
     if (empty($this->id = $data['id'])) {
       $this->firstName = $data['firstName'];
       $this->lastName = $data['lastName'];
       $this->birthday = $data['birthday'];
-      $this->sex = $data['sex'];
+      $this->sex = intval($data['sex']);
       $this->city = $data['city'];
 
       preg_match('/^[a-zA-Zа-яА-Я\ \']+$/', $this->firstName, $first);
@@ -46,6 +51,7 @@ class PeopleDatabase
       }
       $this->savePeople();
     } else {
+
       $this->getPeople();
     }
   }
@@ -90,11 +96,7 @@ class PeopleDatabase
     }
   }
 
-  /**
-   * @param int $id
-   * 
-   * @return string
-   */
+
   public function deletePeople(int $id): string
   {
     $sql = "DELETE FROM users WHERE id=$id";
@@ -103,11 +105,6 @@ class PeopleDatabase
     return "people with id=$id delete";
   }
 
-  /**
-   * @param string $birthday
-   * 
-   * @return int
-   */
   private static function getAge(string $birthday): int
   {
 
@@ -120,15 +117,8 @@ class PeopleDatabase
     return $age;
   }
 
-
-  /**
-   * @param bool $sex
-   * 
-   * @return string
-   */
   private static function getSex(bool $sex): string
   {
-
     return $sex ? 'женщина' : 'мужчина';
   }
 
@@ -137,17 +127,23 @@ class PeopleDatabase
    */
   private function getPeople(): string
   {
+
     try {
       $sql = "SELECT * FROM users WHERE ID=$this->id";
       $db = new PDO('mysql:host=localhost;dbname=people', 'root', '');
       $obj = $db->query($sql)->fetch(PDO::FETCH_ASSOC);
-      $this->firstName = $obj['FIRST_NAME'];
-      $this->lastName = $obj['LAST_NAME'];
-      $this->birthday = $obj['BIRTHDAY'];
-      $this->sex = $obj['SEX'];
-      $this->city = $obj['CITY'];
+      if (!empty($obj)) {
+        $this->firstName = $obj['FIRST_NAME'];
+        $this->lastName = $obj['LAST_NAME'];
+        $this->birthday = $obj['BIRTHDAY'];
+        $this->sex = $obj['SEX'];
+        $this->city = $obj['CITY'];
+        return true;
+      } else {
+        return false;
+      }
     } catch (PDOException $e) {
-      return $e;
+      return $e->getMessage();
     }
   }
 
@@ -159,6 +155,10 @@ class PeopleDatabase
    */
   public function formatPeople(bool $age = false, bool $sex = false): object
   {
+
+    if (empty($this->firstName)) {
+      return new stdClass();
+    }
 
     $obj = new stdClass();
     $obj->id = $this->id;
